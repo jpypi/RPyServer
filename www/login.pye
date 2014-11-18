@@ -1,0 +1,140 @@
+import hashlib
+users={"Lia":"de53182f54089e1f97a63fa61d4ea1d0a1952225",
+       "James":"de53182f54089e1f97a63fa61d4ea1d0a1952225"}
+
+def main(handler,path,fields):
+    session=handler.StartSession()
+    perform_redirect=False
+
+    if fields.get("login")=="Login":
+        username=fields.get("u_name")
+        password=fields.get("p_word","")
+
+        if hashlib.sha1(password).hexdigest()==users.get(username):
+            session["special_user"]="True"
+            session["name"]=username
+            perform_redirect=True
+
+    elif fields.get("logout")=="Logout":
+        session.destroy()
+        
+        
+    if session["special_user"]=="True":
+        main_block="""
+        <form method="post" action="login.pye">
+            <p style="margin-left: 5px;">Logged in as: %s</p>
+            <p><input type="submit" name="logout" value="Logout" id="logout"/></p>
+        </form>
+        """%session["name"]
+    else:
+        main_block="""<form method="post" action="login.pye">
+            <p class="row"><span class="column small-3 medium-2">Name:</span><span class="column end small-6 medium-3" ><input type="text" name="u_name"/></span></p>
+            <p class="row"><span class="column small-3 medium-2">Password:</span><span class="column end small-6 medium-3" ><input type="password" name="p_word"/></span></p>
+            
+            <d class="row">
+                <div class="column small-2"><input style="margin-left: 0px;" type="submit" name="login" value="Login"/></div>
+            </d>
+            <input type="hidden" name="return" value="%s"/>
+        </form>"""%fields.get("return","")
+			
+    if perform_redirect:
+        if fields.get("return"):
+            handler.response_headers.append("Location: "+fields.get("return"))
+        else:
+            handler.response_headers.append("Location: http://"+handler.host+"/login.pye")
+        return "",False,303
+    else:
+        return """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui"/>
+		<title>Login - RPiLand</title>
+		<link rel="stylesheet" type="text/css" href="/css/foundation.css"/>
+		<link rel="stylesheet" type="text/css" href="/css/main-style.css"/>
+		<style type="text/css">
+		    #logout{
+		        background-color: maroon;
+		        background-image: linear-gradient(to bottom,red 0,maroon 100%);
+		        border-radius: 4px;
+		        border: none;
+		        padding: 5px;
+		        color: white;
+		        font-size: 15px;
+		        font-family: Arial;
+		        margin: 5px;
+		        cursor: pointer;
+		    }
+		    input[type="text"],input[type="password"]{
+		        width: 90%;
+		        border-width: 1px;
+		    }
+		    #wrapper{	
+                margin-top: 0px;
+            }
+		</style>
+		<script type="text/javascript" src="/js/jquery.min-1.8.0.js"></script>
+		<script type="text/javascript" src="/js/fastclick.js"></script>
+		<script type="text/javascript" src="/js/foundation.min.js"></script>
+		<script type="text/javascript" src="/js/foundation.offcanvas.js"></script>
+	</head>
+	<body>
+	<div class="page">
+	    <div class="off-canvas-wrap" data-offcanvas>
+			<div class="inner-wrap">
+				<nav class="tab-bar show-for-small-only">
+					<section class="left-small">
+						<span class="left-off-canvas-toggle menu-icon"><span></span></span>
+					</section>
+					<section class="middle tab-bar-section">
+						<h1 class="title" style="text-align: left; font-size: 12pt !important; font-weight: normal;">Login</h1>
+					</section>
+				</nav>
+				
+				<aside class="left-off-canvas-menu overlap">
+				    <ul class="off-canvas-list">
+				        <li><label>General</label></li>
+				        <li><a href="/">Home</a></li>
+                        <li><a href="hello.html">The hello page</a></li>
+                        <li><a href="/chat/">Chat</a></li>"""+(session["special_user"]=="True" and "<li><label>Special</label></li><li><a href=\"/Amoeba/Lia.pye\">Lia Chat</a></li>" or "")+"""
+				    </ul>
+				</aside>
+				
+				<section class="main-section">
+				    <p class="responsive-wrapper-top-padding show-for-medium-up"></p>
+                    <div id="wrapper">
+                        <h1 class="show-for-medium-up content">Login</h1>
+                        <div id="nav" class="row show-for-medium-up">
+                            <a href="/">Home</a>
+                            <a href="hello.html">The hello page</a>
+                            <a href="/chat/">Chat</a>
+                            """+(session["special_user"]=="True" and "<a href=\"/Amoeba/Lia.pye\">Lia Chat</a>" or "")+"""
+                        </div>
+                        <div class="content">
+                            """+main_block+"""
+                        </div>
+                    </div>
+                </section>
+                <a class="exit-off-canvas" href="#"></a>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).foundation({
+        		offcanvas:{
+        			open_method: "overlap", //move or overlap
+        		}
+        	});
+            function updateMenu(){
+                $("aside,.exit-off-canvas").height($(this).height());
+            }
+            $(window).resize(function(){
+                updateMenu();
+            })
+            $(document).ready(updateMenu);
+        </script>
+    </div>
+	</body>
+</html>"""
+    
+        
+    

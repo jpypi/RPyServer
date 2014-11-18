@@ -1,0 +1,107 @@
+body{
+    padding: 0px;
+    margin: 0px !important;
+    color: lightgrey;
+    background-color: grey;
+    min-height: 100%;
+    /*-webkit-transform: translate3d(0,0,0);
+    -webkit-backface-visibility: hidden;*/
+}
+
+#wrapper{
+    max-width: 850px;
+    margin: 2px auto 0px auto;
+    padding-top: 1px;
+    background-color: #3c5757;
+}
+
+#nav{
+    width: 100%;
+    background-color: #78973f;
+}
+
+#nav a{
+    display: inline-block;
+    margin: 4px;
+    padding: 5px;
+    background-color: maroon;
+    background-image: linear-gradient(to bottom,#428bca 0,#2d6ca2 100%);
+	border-radius: 4px;
+    color: lightgrey;
+    text-decoration: underline;
+    box-shadow: inset 1px lightgrey
+}
+
+#time{
+	display:inline-block;
+	float: right;
+	margin: 4px;
+	padding: 5px;
+	font-family: Arial;
+}
+
+.content{
+    padding: 2px;
+}
+
+h1 {
+	color: lightgrey;
+	background-color: inherit;
+	font-size: 2em;
+	/*rgb(191,0,127)*/
+}
+
+.responsive-wrapper-top-padding{
+	height: 2px;
+	line-height: 0px;
+	padding: 0px;
+	margin: 0px;
+}
+
+.tab-bar{
+	background-color: #78973f;
+}
+
+.left-off-canvas-toggle, .right-off-canvas-toggle{
+	cursor: pointer;
+}
+
+input[type="text"],input[type="password"]{
+	font-size: 16px;
+}
+
+input[type="button"]{
+	font-size: 16px;
+}
+
+.left-off-canvas-menu .warn{
+	border-radius: 0px;
+}
+
+.clearfix{
+	clear: both;
+}
+
+.off-canvas-wrap,aside,.exit-off-canvas{
+	min-height: 100%;
+}
+.page{
+	height: 100%;
+}
+
+
+/*form styling mostly resetting from foundation changes*/
+/*input[type="checkbox"]{
+	margin: 3px;
+}
+
+
+input[type="text"]{
+	color: black;
+	padding: 2px;
+	margin-bottom: 5px;
+	line-height: normal;
+}
+input[type="text"]:focus{
+	background-color: white;
+}/*

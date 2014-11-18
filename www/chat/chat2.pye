@@ -1,0 +1,82 @@
+#!/usr/bin/python
+
+import cgi
+import cgitb
+cgitb.enable(1)
+
+import json
+import time
+from os import path as os_path
+from os import sep as os_sep
+from re import compile as re_compile
+url_patt=re_compile("https?://[^ ]+")
+
+def Wrap(value,entity="p"):
+    return "<"+entity+">"+value+"</"+entity+">"
+
+users=[]
+def main(handler,path,fields):
+    
+    try:
+        get=float(fields.get("get"))
+    except TypeError: #If they didn't send us a float... we got a hacker (cracker)!!
+        return "",False #Just return nothing since they're hacking anyway no need to use up cpu and memory
+        
+    put=fields.get("put")
+    presence=fields.get("presence","")
+
+    data={"lct":0,"messages":[],"ct":0,"present":[]} #lct stands for last chat time; ct stands for count
+
+    current_directory=os_path.split(path)[0]+os_sep
+    chat_file=current_directory+"chat_messages.txt"
+
+    user_presence_delay=8
+    for i,user in enumerate(users):
+        if time.time()-user[0]>user_presence_delay:
+            users.pop(i) #Remove users that have not been active for 8 seconds
+
+    user_present_request=cgi.escape(presence.strip())
+    for user in users: #Only add the user to the users online list if this user isn't already in it
+        if user[1]==user_present_request:
+            break
+    else: #This works because if we break we don't enter this
+        users.append((time.time(),user_present_request))
+
+    #Sort the users and add them to the data to the payload
+    users.sort(key=lambda x:x[1])
+    data["present"]=users
+            
+    if put:
+        f=open(chat_file,"a")
+        # Use <> as separators because user input is sanitized for those
+        # The time thing is because we need to adjust how much we adjust time.time() to
+        # be UTC time from our current timezone, because time.time() is more accurate than
+        # time.gmtime() and the timezone offset changes depending on daylight savings time
+        #+(time.daylight and time.altzone or time.timezone)
+        f.write("%.6f<>%s<>%s\n"%(time.time(),cgi.escape(presence.strip()),cgi.escape(put.strip())))
+        f.close()
+
+    try:            
+        f=open(chat_file,"r")
+        messages=f.read().strip().split("\n")
+        f.close()
+        
+        send=[]
+        lct=0
+        t1=time.time()
+        for message in messages:
+            msg=message.split("<>",2)
+            if float(msg[0])>get:
+                msg[2]=url_patt.sub(r'<a href="\g<0>">\g<0></a>',msg[2])
+                send.append(msg)
+                lct=max(float(msg[0]),lct)
+        print time.time()-t1
+        
+        data["lct"]=lct
+        data["ct"]=len(send)
+        data["messages"]=send
+
+    except IOError:
+        pass
+
+    return json.dumps(data)##,False #This "False" tells the server not to compress our output
